@@ -1,0 +1,14 @@
+# Build artefacts
+/pipe-shell
+build/
+*.o
+*.a
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Test artefacts
+test_*.txt
