@@ -228,16 +228,17 @@ MIT. See [`LICENSE`](LICENSE).
 
 ## Related projects
 
-This was project 11 of the
+One of the
 **[gpu-engineering curriculum](https://github.com/404Piyush/gpu-engineering)**,
-a three-year systems and hardware roadmap. Other projects so far:
+a three-year systems and hardware roadmap. More projects
+incoming.
+
+Other projects so far:
 
 - **[bst-library](https://github.com/404Piyush/bst-library)** — generic
   binary-search tree in C11 (week 4)
 - **[arena-allocator](https://github.com/404Piyush/arena-allocator)** — bump
   arena memory allocator in C11 (week 8)
-
-More projects incoming.
 
 ## Changelog
 
