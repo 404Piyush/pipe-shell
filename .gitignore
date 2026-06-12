@@ -15,3 +15,4 @@ test_*.txt
 
 # Local Netlify folder
 .netlify
+.vercel
