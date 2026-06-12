@@ -12,3 +12,6 @@ build/
 
 # Test artefacts
 test_*.txt
+
+# Local Netlify folder
+.netlify
