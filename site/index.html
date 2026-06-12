@@ -3,126 +3,237 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>pipe-shell · A POSIX-ish command interpreter in C11</title>
-  <meta name="description" content="A small, dependency-free POSIX-ish command interpreter in C11. Pipelines, redirection, backgrounding, built-ins. 56 tests, all passing.">
-  <meta name="theme-color" content="#0f172a">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="pipe-shell · A POSIX-ish command interpreter in C11">
-  <meta property="og:description" content="Pipelines, redirection, backgrounding, built-ins. 56 tests, all passing. ~500 LOC.">
-  <meta name="twitter:card" content="summary_large_image">
+  <title>pipe-shell — A POSIX-ish command interpreter in C11</title>
+  <meta name="description" content="A small dependency-free POSIX-ish command interpreter in C11. Pipelines, redirection, backgrounding, built-ins. 56 tests passing.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="hero">
-  <div class="container">
-    <div class="hero-top">
-      <a class="logo" href="index.html">pipe<span>-shell</span></a>
-      <nav>
-        <a href="#features">Features</a>
-        <a href="#example">Demo</a>
-        <a href="#api">API</a>
-        <a href="https://github.com/404Piyush/pipe-shell">GitHub →</a>
-      </nav>
-    </div>
-    <div class="hero-grid">
-      <div class="hero-text">
-        <span class="badge">v1.0.0 · MIT</span>
-        <h1>A POSIX-ish command interpreter in C11.</h1>
-        <p class="lede">Pipelines.  Redirection.  Backgrounding.  Built-ins.  A recursive parser, the full pipeline recipe, and an interactive REPL.  <strong>~500 LOC</strong>.  56 assertions, all passing.</p>
-        <div class="cta">
-          <a class="btn primary" href="https://github.com/404Piyush/pipe-shell#install">Install</a>
-          <a class="btn ghost" href="https://github.com/404Piyush/pipe-shell#api">View API</a>
-        </div>
-        <pre class="install"><code>$ git clone https://github.com/404Piyush/pipe-shell.git
-$ cd pipe-shell && make test
-56 passed, 0 failed
-$ ./pipe-shell
-pipe-shell$ ls /etc | grep hosts | wc -l
-       3
-pipe-shell$ exit</code></pre>
-      </div>
-      <div class="hero-svg">
-        <object type="image/svg+xml" data="pipeline.svg" aria-label="Pipeline recipe: N-1 pipes, N forks"></object>
-      </div>
-    </div>
-  </div>
-</header>
+<article class="page">
 
-<section id="features" class="container">
+  <h1>pipe-shell</h1>
+  <p class="lede">A POSIX-ish command interpreter in C11.</p>
+  <p class="byline">Week 11 capstone · 14 June 2026 · 5 min read</p>
+
+  <p>
+    A shell is the universal Swiss-army knife of Unix. A 500-line
+    shell that handles pipelines correctly is the smallest version
+    of <code>bash</code> worth understanding. Once you can read it,
+    the rest of Unix — daemons, init, job control, container
+    runtimes — falls into place.
+  </p>
+
+  <p>
+    This is that 500 lines. It parses a command line, splits it on
+    <code>|</code>, applies redirections, forks a child for each
+    stage, and reaps the foreground pipeline in order. The whole
+    executor is about 30 lines of C.
+  </p>
+
   <h2>What's in the box</h2>
-  <div class="grid three">
-    <div class="card">
-      <h3>Recursive parser</h3>
-      <p>Line in, AST out.  Splits on <code>|</code>, then tokenizes each stage on whitespace, honouring <code>&lt;</code>, <code>&gt;</code>, and <code>&gt;&gt;</code> as metacharacters.</p>
-    </div>
-    <div class="card">
-      <h3>General pipeline recipe</h3>
-      <p>N-1 pipes, N children, N-1 parent-side <code>close()</code>s.  The executor is 30 lines.  Tested with 1, 2, and 3 stages plus redirection in every position.</p>
-    </div>
-    <div class="card">
-      <h3>Interactive &amp; one-shot</h3>
-      <p>Run it as a REPL (<code>./pipe-shell</code>) or one-shot (<code>./pipe-shell --run "cmd | cmd"</code>).  The <code>--show</code> flag prints the AST before running.</p>
-    </div>
-  </div>
-</section>
 
-<section id="example" class="container">
-  <h2>See it in action</h2>
-  <pre class="code"><code>$ ./pipe-shell --run "ls /etc | grep hosts | wc -l"
-       3
-
-$ ./pipe-shell --run "echo hello world &gt; /tmp/out.txt; cat /tmp/out.txt"
-hello world
-
-$ ./pipe-shell --run "wc -l &lt; Makefile"
-      25
-
-$ ./pipe-shell --run "ls /usr | grep stdio --show"
-stage[0]: [ls] [/usr]
-stage[1]: [grep] [stdio]  &gt; /dev/null
-(no output on stdout; printed to /dev/null)</code></pre>
-</section>
-
-<section id="api" class="container">
-  <h2>API at a glance</h2>
-  <p>The library surface is three functions:</p>
-  <pre class="code"><code>bool shell_parse    (const char *line, shell_cmd *out);
-int  shell_run      (const shell_cmd *cmd);
-void shell_cmd_print(const shell_cmd *cmd, FILE *f);</code></pre>
-
-  <h3>The four rules of pipelines</h3>
-  <ol class="rules">
-    <li>Parent closes its copy of every pipe fd (or consumer hangs forever).</li>
-    <li>Child <code>dup2</code>s the read end to stdin, the write end to stdout.</li>
-    <li>Child closes all fds it doesn't need before <code>exec</code>.</li>
-    <li>Parent <code>waitpid</code>s every child (foreground) or none (background <code>&amp;</code>).</li>
-  </ol>
-</section>
-
-<section class="container">
-  <h2>Limitations (intentional)</h2>
-  <ul class="limits">
-    <li>No glob (<code>*</code>) or variable (<code>$HOME</code>) expansion.</li>
-    <li>No quoting of any kind.</li>
-    <li>No <code>;</code>, <code>&amp;&amp;</code>, <code>||</code>.  A line is one pipeline.</li>
-    <li>No job control.  Background jobs are fire-and-forget.</li>
+  <ul>
+    <li>Simple commands: <code>ls -la</code></li>
+    <li>Pipelines: <code>ls | grep foo | wc -l</code></li>
+    <li>Input redirection: <code>wc -l &lt; file.txt</code></li>
+    <li>Output redirection: <code>ls &gt; out.txt</code> or <code>ls &gt;&gt; out.txt</code></li>
+    <li>Background: trailing <code>&amp;</code></li>
+    <li>Built-ins: <code>exit [N]</code>, <code>cd [DIR]</code></li>
+    <li>Interactive REPL and one-shot <code>--run</code> CLI</li>
   </ul>
-  <p>Each missing feature is a 100-200 line change on top of the existing structure — a good follow-up project.</p>
-</section>
+
+  <p>
+    What's deliberately missing: glob expansion, variable expansion,
+    quoting of any kind, <code>;</code>/<code>&amp;&amp;</code>/
+    <code>||</code>, job control. Each of these is a 100 to 200
+    line feature on top of the existing structure. They are good
+    follow-up work, not part of the minimum.
+  </p>
+
+  <h2>Try it</h2>
+
+  <p>
+    The playground below runs the same parser in JavaScript. Type
+    a command line; the AST updates as you type. The right panel
+    shows the kernel call sequence that an executor would make for
+    that AST: pipe, fork, dup2, exec, wait. Click an example to
+    load it.
+  </p>
+
+  <section class="playground">
+    <h3>Playground</h3>
+
+    <div class="pg-input">
+      <span class="pg-prompt">$</span>
+      <input id="pg-input" type="text" value="ls /etc | grep hosts | wc -l" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="pg-panels">
+      <div class="pg-panel">
+        <h4>Parsed AST</h4>
+        <div id="pg-ast" class="pg-ast"></div>
+      </div>
+      <div class="pg-panel" style="padding:0; border:0; background:transparent">
+        <h4 style="padding:0 0 8px 0">Kernel call sequence</h4>
+        <pre id="pg-trace" class="pg-trace"></pre>
+      </div>
+    </div>
+
+    <div class="pg-examples">
+      <span style="font-family: var(--sans); font-size: 12px; color: var(--muted); align-self: center; margin-right: 4px;">examples:</span>
+      <button class="pg-example" data-cmd="ls -la">ls -la</button>
+      <button class="pg-example" data-cmd="cat /etc/hosts | grep localhost">cat | grep</button>
+      <button class="pg-example" data-cmd="ls /usr/include | grep stdio | wc -l">3-stage pipe</button>
+      <button class="pg-example" data-cmd="echo hello > /tmp/out.txt">echo &gt; out</button>
+      <button class="pg-example" data-cmd="wc -l < Makefile">wc &lt; in</button>
+      <button class="pg-example" data-cmd="sleep 5 &">background</button>
+    </div>
+  </section>
+
+  <h2>The parser</h2>
+
+  <p>
+    The parser does three passes. First, strip a trailing
+    <code>&amp;</code> and record the background flag. Then split
+    on <code>|</code> into stages — we use <code>strchr</code>
+    instead of <code>strtok_r</code> because the latter silently
+    drops empty trailing fields, which is exactly the syntax
+    error we want to detect. Then tokenize each stage on
+    whitespace, treating <code>&lt;</code>, <code>&gt;</code>, and
+    <code>&gt;&gt;</code> as single-character metacharacters that
+    consume the next word as the redirection target.
+  </p>
+
+  <p>
+    The parser is non-allocating. It mutates a local copy of the
+    input line in place and stores pointers into it. No garbage,
+    no allocator pressure, no copies.
+  </p>
+
+  <h2>The pipeline recipe</h2>
+
+  <p>
+    The executor is 30 lines. The shape is:
+  </p>
+
+<pre><code>int prev_fd = -1;
+for (i = 0; i &lt; n_stages; i++) {
+    int pipe_fd[2] = {-1, -1};
+    if (i + 1 &lt; n_stages) pipe(pipe_fd);
+    pid_t pid = fork();
+    if (pid == 0) {
+        run_stage(&amp;stages[i], prev_fd, pipe_fd[1]);
+    }
+    /* parent: drop both ends of the previous pipe */
+    if (prev_fd &gt;= 0) close(prev_fd);
+    prev_fd = pipe_fd[0];
+    if (pipe_fd[1] &gt;= 0) close(pipe_fd[1]);
+}
+if (!background) wait for every child;</code></pre>
+
+  <p>
+    The crucial detail: <strong>every</strong> pipe fd the parent
+    has a copy of must be closed, or the consumer's
+    <code>read(2)</code> will block forever. Get that wrong and
+    the user sees a shell that prints nothing and never returns.
+    I made this bug twice while writing the executor. It is the
+    most common shell bug.
+  </p>
+
+  <h2>The four rules</h2>
+
+  <p>
+    Pipeline programming has four rules. Get them right and the
+    rest is bookkeeping.
+  </p>
+
+  <ol>
+    <li>
+      The parent closes its copy of every pipe fd. If it does
+      not, the consumer's <code>read(2)</code> blocks forever
+      because the kernel will not generate EOF until
+      <em>every</em> reference to the write end is gone.
+    </li>
+    <li>
+      The child <code>dup2</code>s the read end of its input pipe
+      to stdin, and the write end of its output pipe to stdout.
+      After the dup, the pipe fds can be closed.
+    </li>
+    <li>
+      The child closes every fd it does not need before
+      <code>exec</code>. The fd table is preserved across
+      <code>exec</code>, so unclosed fds leak into the new
+      program.
+    </li>
+    <li>
+      The parent <code>waitpid</code>s every child for a
+      foreground pipeline, or none of them for a background
+      pipeline.
+    </li>
+  </ol>
+
+  <h2>Tests</h2>
+
+  <p>
+    56 assertions across 13 test cases, all passing. The suite
+    covers the parser (8 cases: simple commands, all three
+    redirections, pipelines, background, error cases) and the
+    executor (5 cases: true, false, input redirection, output
+    redirection, append redirection, pipeline-with-redirection,
+    the <code>cd</code> built-in).
+  </p>
+
+  <p>
+    The test framework is in the repo, no external dependency. Each
+    test is a plain C function that calls <code>ASSERT_*</code>
+    macros; the runner reports a pass/fail count and exits non-zero
+    on any failure.
+  </p>
+
+  <h2>Source</h2>
+
+  <p>
+    The repository lives at
+    <a href="https://github.com/404Piyush/pipe-shell">github.com/404Piyush/pipe-shell</a>.
+    The <a href="https://github.com/404Piyush/pipe-shell/tree/main/include/shell.h">public header</a>,
+    the <a href="https://github.com/404Piyush/pipe-shell/tree/main/src/shell.c">parser + executor</a>,
+    and the
+    <a href="https://github.com/404Piyush/pipe-shell/tree/main/tests/test_shell.c">test suite</a>
+    are the three files worth reading. The header is the contract.
+    The parser + executor is about 250 lines. The test suite is
+    about 300 lines.
+  </p>
+
+  <p>
+    To build and test locally:
+  </p>
+
+<pre><code>git clone https://github.com/404Piyush/pipe-shell
+cd pipe-shell
+make test
+./pipe-shell</code></pre>
+
+  <hr>
+
+  <p>
+    The other two projects in this curriculum are
+    <a href="https://bst-library.404piyush.me">bst-library</a>
+    and
+    <a href="https://arena-allocator.404piyush.me">arena-allocator</a>.
+  </p>
+
+</article>
 
 <footer>
-  <div class="container">
-    <p>
-      <a href="https://github.com/404Piyush/pipe-shell">Source on GitHub</a> ·
-      <a href="https://github.com/404Piyush/pipe-shell/releases/tag/v1.0.0">v1.0.0</a> ·
-      <a href="https://github.com/404Piyush">More projects</a> ·
-      <a href="https://404piyush.me">404piyush.me</a>
-    </p>
-    <p class="small">MIT · built by <a href="https://github.com/404Piyush">@404Piyush</a> · curriculum: gpu-engineering</p>
-  </div>
+  <p>Piyush · gpu-engineering curriculum</p>
+  <p>MIT license ·
+     <a href="https://github.com/404Piyush/pipe-shell">source</a> ·
+     <a href="https://github.com/404Piyush/pipe-shell/issues">issues</a></p>
 </footer>
+
+<script src="shell.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
