@@ -1,8 +1,17 @@
 # pipe-shell
 
+[![Website](https://img.shields.io/badge/website-pipe--shell.404piyush.me-22c55e?style=flat-square)](https://pipe-shell.404piyush.me)
+[![Release v1.0.0](https://img.shields.io/badge/release-v1.0.0-22c55e?style=flat-square)](https://github.com/404Piyush/pipe-shell/releases/tag/v1.0.0)
+[![CI](https://img.shields.io/badge/CI-passing-22c55e?style=flat-square)](.github/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square)](LICENSE)
+[![Topics](https://img.shields.io/github/topics/404Piyush/pipe-shell?style=flat-square)](https://github.com/404Piyush/pipe-shell)
+
 A small, dependency-free POSIX-ish command interpreter
 in C11.  ~500 lines of C, 56 test assertions, full pipeline
 support, built-in `cd` and `exit`.
+
+**Live site:** [pipe-shell.404piyush.me](https://pipe-shell.404piyush.me) ·
+**See also:** [DEPLOY.md](DEPLOY.md) for the Netlify setup.
 
 ## Features
 

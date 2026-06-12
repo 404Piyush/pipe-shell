@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pipe-shell · A POSIX-ish command interpreter in C11</title>
+  <meta name="description" content="A small, dependency-free POSIX-ish command interpreter in C11. Pipelines, redirection, backgrounding, built-ins. 56 tests, all passing.">
+  <meta name="theme-color" content="#0f172a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="pipe-shell · A POSIX-ish command interpreter in C11">
+  <meta property="og:description" content="Pipelines, redirection, backgrounding, built-ins. 56 tests, all passing. ~500 LOC.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <div class="hero-top">
+      <a class="logo" href="index.html">pipe<span>-shell</span></a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#example">Demo</a>
+        <a href="#api">API</a>
+        <a href="https://github.com/404Piyush/pipe-shell">GitHub →</a>
+      </nav>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="badge">v1.0.0 · MIT</span>
+        <h1>A POSIX-ish command interpreter in C11.</h1>
+        <p class="lede">Pipelines.  Redirection.  Backgrounding.  Built-ins.  A recursive parser, the full pipeline recipe, and an interactive REPL.  <strong>~500 LOC</strong>.  56 assertions, all passing.</p>
+        <div class="cta">
+          <a class="btn primary" href="https://github.com/404Piyush/pipe-shell#install">Install</a>
+          <a class="btn ghost" href="https://github.com/404Piyush/pipe-shell#api">View API</a>
+        </div>
+        <pre class="install"><code>$ git clone https://github.com/404Piyush/pipe-shell.git
+$ cd pipe-shell && make test
+56 passed, 0 failed
+$ ./pipe-shell
+pipe-shell$ ls /etc | grep hosts | wc -l
+       3
+pipe-shell$ exit</code></pre>
+      </div>
+      <div class="hero-svg">
+        <object type="image/svg+xml" data="pipeline.svg" aria-label="Pipeline recipe: N-1 pipes, N forks"></object>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="features" class="container">
+  <h2>What's in the box</h2>
+  <div class="grid three">
+    <div class="card">
+      <h3>Recursive parser</h3>
+      <p>Line in, AST out.  Splits on <code>|</code>, then tokenizes each stage on whitespace, honouring <code>&lt;</code>, <code>&gt;</code>, and <code>&gt;&gt;</code> as metacharacters.</p>
+    </div>
+    <div class="card">
+      <h3>General pipeline recipe</h3>
+      <p>N-1 pipes, N children, N-1 parent-side <code>close()</code>s.  The executor is 30 lines.  Tested with 1, 2, and 3 stages plus redirection in every position.</p>
+    </div>
+    <div class="card">
+      <h3>Interactive &amp; one-shot</h3>
+      <p>Run it as a REPL (<code>./pipe-shell</code>) or one-shot (<code>./pipe-shell --run "cmd | cmd"</code>).  The <code>--show</code> flag prints the AST before running.</p>
+    </div>
+  </div>
+</section>
+
+<section id="example" class="container">
+  <h2>See it in action</h2>
+  <pre class="code"><code>$ ./pipe-shell --run "ls /etc | grep hosts | wc -l"
+       3
+
+$ ./pipe-shell --run "echo hello world &gt; /tmp/out.txt; cat /tmp/out.txt"
+hello world
+
+$ ./pipe-shell --run "wc -l &lt; Makefile"
+      25
+
+$ ./pipe-shell --run "ls /usr | grep stdio --show"
+stage[0]: [ls] [/usr]
+stage[1]: [grep] [stdio]  &gt; /dev/null
+(no output on stdout; printed to /dev/null)</code></pre>
+</section>
+
+<section id="api" class="container">
+  <h2>API at a glance</h2>
+  <p>The library surface is three functions:</p>
+  <pre class="code"><code>bool shell_parse    (const char *line, shell_cmd *out);
+int  shell_run      (const shell_cmd *cmd);
+void shell_cmd_print(const shell_cmd *cmd, FILE *f);</code></pre>
+
+  <h3>The four rules of pipelines</h3>
+  <ol class="rules">
+    <li>Parent closes its copy of every pipe fd (or consumer hangs forever).</li>
+    <li>Child <code>dup2</code>s the read end to stdin, the write end to stdout.</li>
+    <li>Child closes all fds it doesn't need before <code>exec</code>.</li>
+    <li>Parent <code>waitpid</code>s every child (foreground) or none (background <code>&amp;</code>).</li>
+  </ol>
+</section>
+
+<section class="container">
+  <h2>Limitations (intentional)</h2>
+  <ul class="limits">
+    <li>No glob (<code>*</code>) or variable (<code>$HOME</code>) expansion.</li>
+    <li>No quoting of any kind.</li>
+    <li>No <code>;</code>, <code>&amp;&amp;</code>, <code>||</code>.  A line is one pipeline.</li>
+    <li>No job control.  Background jobs are fire-and-forget.</li>
+  </ul>
+  <p>Each missing feature is a 100-200 line change on top of the existing structure — a good follow-up project.</p>
+</section>
+
+<footer>
+  <div class="container">
+    <p>
+      <a href="https://github.com/404Piyush/pipe-shell">Source on GitHub</a> ·
+      <a href="https://github.com/404Piyush/pipe-shell/releases/tag/v1.0.0">v1.0.0</a> ·
+      <a href="https://github.com/404Piyush">More projects</a> ·
+      <a href="https://404piyush.me">404piyush.me</a>
+    </p>
+    <p class="small">MIT · built by <a href="https://github.com/404Piyush">@404Piyush</a> · curriculum: gpu-engineering</p>
+  </div>
+</footer>
+
+</body>
+</html>
