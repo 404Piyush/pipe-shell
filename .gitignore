@@ -5,7 +5,6 @@ build/
 *.a
 
 # Editor cruft
-.vscode/
 .idea/
 *.swp
 .DS_Store
@@ -16,3 +15,7 @@ test_*.txt
 # Local Netlify folder
 .netlify
 .vercel
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

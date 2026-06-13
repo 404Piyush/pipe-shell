@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>pipe-shell — A POSIX-ish command interpreter in C11</title>
-  <meta name="description" content="A small dependency-free POSIX-ish command interpreter in C11. Pipelines, redirection, backgrounding, built-ins. 56 tests passing.">
+  <meta name="description" content="A small dependency-free POSIX-ish command interpreter in C11. Pipelines, redirection (including stderr and multiple per stage), backgrounding, built-ins. 62 tests passing.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -38,6 +38,8 @@
     <li>Pipelines: <code>ls | grep foo | wc -l</code></li>
     <li>Input redirection: <code>wc -l &lt; file.txt</code></li>
     <li>Output redirection: <code>ls &gt; out.txt</code> or <code>ls &gt;&gt; out.txt</code></li>
+    <li>Stderr redirection: <code>ls /no 2&gt; err.txt</code> or <code>2&gt;&gt;</code> (append)</li>
+    <li>Multiple per stage: <code>cmd &lt; in &gt; out 2&gt; err</code></li>
     <li>Background: trailing <code>&amp;</code></li>
     <li>Built-ins: <code>exit [N]</code>, <code>cd [DIR]</code></li>
     <li>Interactive REPL and one-shot <code>--run</code> CLI</li>
@@ -176,19 +178,21 @@ if (!background) wait for every child;</code></pre>
   <h2>Tests</h2>
 
   <p>
-    56 assertions across 13 test cases, all passing. The suite
-    covers the parser (8 cases: simple commands, all three
-    redirections, pipelines, background, error cases) and the
-    executor (5 cases: true, false, input redirection, output
-    redirection, append redirection, pipeline-with-redirection,
-    the <code>cd</code> built-in).
+    62 assertions across 17 test cases, all passing. The suite
+    covers the parser (11 cases: simple commands, all five
+    redirect forms, multi-redirect, pipelines, background,
+    error cases) and the executor (6 cases: <code>true</code>,
+    <code>false</code>, input redirect, output redirect,
+    stderr redirect, multi-redirect, <code>cd</code> built-in).
   </p>
 
   <p>
-    The test framework is in the repo, no external dependency. Each
-    test is a plain C function that calls <code>ASSERT_*</code>
-    macros; the runner reports a pass/fail count and exits non-zero
-    on any failure.
+    62 assertions across 17 test cases, all passing. The suite
+    covers the parser (11 cases: simple commands, all five
+    redirect forms, multi-redirect, pipelines, background,
+    error cases) and the executor (6 cases: <code>true</code>,
+    <code>false</code>, input redirect, output redirect,
+    stderr redirect, multi-redirect, <code>cd</code> built-in).
   </p>
 
   <h2>Source</h2>

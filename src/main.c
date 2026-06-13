@@ -1,4 +1,4 @@
-/* src/main.c — entry point for the mini-shell binary
+/* src/main.c — CLI entry point (REPL or --run)
  *
  * Kept in a separate translation unit so that the test binary
  * can link src/shell.c (which provides shell_parse / shell_run)
@@ -12,15 +12,11 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-    /* If invoked with arguments, treat them as one command line. */
     if (argc > 2 && strcmp(argv[1], "--run") == 0) {
         shell_cmd cmd;
         if (!shell_parse(argv[2], &cmd)) {
             fprintf(stderr, "shell: parse error\n");
             return 2;
-        }
-        if (argc > 3 && strcmp(argv[3], "--show") == 0) {
-            shell_cmd_print(&cmd, stderr);
         }
         return shell_run(&cmd);
     }
@@ -38,10 +34,9 @@ int main(int argc, char **argv) {
         return shell_run(&cmd);
     }
 
-    /* Interactive REPL. */
     char line[SHELL_MAX_LINE];
     for (;;) {
-        fprintf(stderr, "pipe-shell$ ");
+        fprintf(stderr, "mini-shell$ ");
         fflush(stderr);
         if (!fgets(line, sizeof line, stdin)) break;
         size_t n = strlen(line);
