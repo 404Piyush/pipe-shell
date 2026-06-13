@@ -17,15 +17,15 @@
   <p class="byline">Week 11 capstone · 14 June 2026 · 5 min read</p>
 
   <p>
-    A shell is the universal Swiss-army knife of Unix. A 500-line
-    shell that handles pipelines correctly is the smallest version
-    of <code>bash</code> worth understanding. Once you can read it,
-    the rest of Unix — daemons, init, job control, container
-    runtimes — falls into place.
+    A shell is the universal Swiss-army knife of Unix. A shell that
+    handles pipelines correctly in a few hundred lines is the
+    smallest version of <code>bash</code> worth understanding.
+    Once you can read it, the rest of Unix — daemons, init, job
+    control, container runtimes — falls into place.
   </p>
 
   <p>
-    This is that 500 lines. It parses a command line, splits it on
+    This is that shell. It parses a command line, splits it on
     <code>|</code>, applies redirections, forks a child for each
     stage, and reaps the foreground pipeline in order. The whole
     executor is about 30 lines of C.

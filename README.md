@@ -1,8 +1,9 @@
 # pipe-shell
 
 A small, dependency-free **POSIX-ish command interpreter**
-in C11. ~500 lines of C, full pipeline support, redirection,
-backgrounding, built-ins, and a testable library API.
+in C11. ~300 lines of parser and executor, plus a thin CLI
+wrapper. Full pipeline support, redirection, backgrounding,
+built-ins, and a testable library API.
 
 > **[pipe-shell.404piyush.me](https://pipe-shell.404piyush.me)** —
 > a live editorial page with an interactive playground. Type a
@@ -10,10 +11,10 @@ backgrounding, built-ins, and a testable library API.
 > sequence animates step by step.
 
 ```
-include/shell.h         public API  (~30 lines)
-src/shell.c             parser + executor  (~250 lines)
-src/main.c              CLI entry point (REPL or --run)
-tests/test_shell.c      test suite  (13 cases, 56 assertions)
+include/shell.h         public API  (~60 lines)
+src/shell.c             parser + executor  (~260 lines)
+src/main.c              CLI entry point  (~60 lines)
+tests/test_shell.c      test suite  (13 cases, 56 assertions, ~230 lines)
 docs/API.md             API reference
 docs/ARCHITECTURE.md    how the pieces fit
 ```
@@ -21,15 +22,16 @@ docs/ARCHITECTURE.md    how the pieces fit
 ## Why
 
 A shell is the universal Swiss-army knife of Unix. A
-500-line shell that handles pipelines correctly is the
-smallest version of `bash` worth understanding. Once you
-can read it, the rest of Unix — daemons, init, job
-control, container runtimes — falls into place.
+shell that handles pipelines correctly in a few hundred
+lines is the smallest version of `bash` worth
+understanding. Once you can read it, the rest of Unix —
+daemons, init, job control, container runtimes — falls
+into place.
 
-This is that 500 lines. It parses a command line, splits
-it on `|`, applies redirections, forks a child for each
-stage, and reaps the foreground pipeline in order. The
-executor is about 30 lines of C.
+This is that shell. It parses a command line, splits it
+on `|`, applies redirections, forks a child for each stage,
+and reaps the foreground pipeline in order. The executor
+is about 30 lines of C.
 
 ## Quick start
 
