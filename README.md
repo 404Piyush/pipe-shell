@@ -1,9 +1,10 @@
 # pipe-shell
 
 A small, dependency-free **POSIX-ish command interpreter**
-in C11. ~300 lines of parser and executor, plus a thin CLI
-wrapper. Full pipeline support, redirection, backgrounding,
-built-ins, and a testable library API.
+in C11. v2 of the original Week-11 capstone. Full pipeline
+support, **stderr redirect** (`2>`, `2>>`), **multiple
+redirection per stage** (`cmd < in > out 2> err`),
+backgrounding, built-ins, and a testable library API.
 
 > **[pipe-shell.404piyush.me](https://pipe-shell.404piyush.me)** —
 > a live editorial page with an interactive playground. Type a
@@ -14,7 +15,7 @@ built-ins, and a testable library API.
 include/shell.h         public API  (~60 lines)
 src/shell.c             parser + executor  (~260 lines)
 src/main.c              CLI entry point  (~60 lines)
-tests/test_shell.c      test suite  (13 cases, 56 assertions, ~230 lines)
+tests/test_shell.c      test suite  (17 cases, 62 assertions, ~330 lines)
 docs/API.md             API reference
 docs/ARCHITECTURE.md    how the pieces fit
 ```
@@ -38,7 +39,7 @@ is about 30 lines of C.
 ```sh
 git clone https://github.com/404Piyush/pipe-shell
 cd pipe-shell
-make test        # 56 assertions, 13 cases
+make test        # 62 assertions, 17 cases
 ./pipe-shell     # interactive REPL
 ./pipe-shell --run "ls | grep hosts | wc -l"  # one-shot
 ```
@@ -75,6 +76,9 @@ The full reference is in [`docs/API.md`](docs/API.md).
 | input redirection     | `wc -l < file.txt`               |
 | output (truncate)     | `ls > out.txt`                   |
 | output (append)       | `ls >> out.txt`                  |
+| stderr (truncate)     | `ls /no 2> err.txt`              |
+| stderr (append)       | `ls /no 2>> err.txt`             |
+| multiple per stage    | `cmd < in > out 2> err`          |
 | background            | `sleep 5 &`                      |
 | built-ins             | `exit [N]`, `cd [DIR]`           |
 
@@ -138,7 +142,7 @@ The four rules of pipeline programming:
 
 ## Tests
 
-56 assertions across 13 test cases. The suite covers:
+62 assertions across 17 test cases. The suite covers:
 
 **Parser (8 cases):**
 - Simple commands
